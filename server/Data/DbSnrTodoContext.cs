@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace server.Models;
+namespace server.Data;
 
 public partial class DbSnrTodoContext : DbContext
 {
