@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.Models;
+using server.Repositories;
 
 namespace server.Controllers
 {
@@ -13,7 +15,7 @@ namespace server.Controllers
     [ApiController]
     public class NotesController : ControllerBase
     {
-        private readonly DbSnrTodoContext _context;
+        /*private readonly DbSnrTodoContext _context;
 
         public NotesController(DbSnrTodoContext context)
         {
@@ -102,6 +104,94 @@ namespace server.Controllers
         private bool NoteExists(int id)
         {
             return _context.Notes.Any(e => e.Id == id);
+        }*/
+
+        public readonly INoteRepository _noteRepo;
+        public NotesController(INoteRepository repo)
+        {
+            _noteRepo = repo;
+        }
+
+        //GET: api/Notes
+        [HttpGet]
+        public async Task<IActionResult> GetNotes()
+        {
+            try
+            {
+                return Ok(await _noteRepo.getAllNotesAsync());
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+        // GET: api/Notes/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetNoteById(int id)
+        {
+            try
+            {
+                var note = await _noteRepo.getNoteAsync(id);
+                return note == null ? NotFound() : Ok(note);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+        // POST: api/Notes
+        [HttpPost]
+        public async Task<IActionResult> PostNote(NoteModel model)
+        {
+            try
+            {
+                var newNoteId = await _noteRepo.postNoteAsync(model);
+                var note = await _noteRepo.getNoteAsync(newNoteId);
+                return note == null ? NotFound() : Ok(note);
+
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+        //PUT: api/Notes
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutNote(int id, [FromBody] NoteModel model)
+        {
+            try
+            {
+                if (id != model.Id)
+                {
+                    return NotFound();
+                }
+                await _noteRepo.updateNoteAsync(id, model);
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+        //DELETE: api/Notes/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> deleteNote([FromRoute] int id)
+        {
+            try
+            {
+                var note = await _noteRepo.getNoteAsync(id);
+                if (note == null)
+                {
+                    return NotFound();
+                }
+                await _noteRepo.deleteNoteAsync(id);
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

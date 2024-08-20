@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +10,17 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
 builder.Services.AddDbContext<DbSnrTodoContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DbSnrTodoString")));
 
+builder.Services.AddAutoMapper(typeof(Program));
+
+// Life cycle DI: AddSingleton(), AddTransient(), AddScoped()
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
